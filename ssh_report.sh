@@ -22,4 +22,4 @@ echo -e "${BOLD}____________________________________${RESET}"
 echo -e "\n${BOLD}${GREEN}  УСПЕШНЫЕ ВХОДЫ${RESET}"
 echo -e "${BOLD}____________________________________${RESET}"
 echo ""
-journalctl | grep -i sshd | grep -i accepted | tail -10
+journalctl | grep -i sshd | grep -i accepted | tail -15
