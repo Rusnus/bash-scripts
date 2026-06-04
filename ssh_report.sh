@@ -10,16 +10,12 @@ RESET='\033[0m'
 
 clear
 
-clear
+echo "SSH отчёт"
 
-echo -e "${BOLD}${CYAN}"
-echo "========================================"
-echo "  SSH ОТЧЁТ"
-echo "========================================"
-echo -e "${RESET}"
+echo "Успешные входы"
+journalctl | grep -i sshd | grep -i "accepted" | tail -10
 
-echo -e "${BOLD}____________________________________${RESET}"
-echo -e "\n${BOLD}${GREEN}  УСПЕШНЫЕ ВХОДЫ${RESET}"
-echo -e "${BOLD}____________________________________${RESET}"
 echo ""
-journalctl | grep -i sshd | grep -i accepted | tail -15
+echo "Неуспешные входы"
+journalctl | grep -i sshd | grep -i "failed password" | tail -10
+
