@@ -1,13 +1,5 @@
 #!/bin/bash
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-RESET='\033[0m'
-
 clear
 
 echo "SSH отчёт"
@@ -19,3 +11,10 @@ echo ""
 echo "Неуспешные входы"
 journalctl | grep -i sshd | grep -i "failed password" | tail -10
 
+echo ""
+echo "Открытые порты"
+ss -tlnp | grep LISTEN | awk '{print $4, $6}'
+
+echo""
+echo "Заблокированные IP (fail2ban)"
+fail2ban-client status sshd | grep "Banned IP list" -A 10
