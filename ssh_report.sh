@@ -5,11 +5,11 @@ clear
 echo "SSH отчёт"
 
 echo "Успешные входы:"
-journalctl | grep -i sshd | grep -i "accepted" | tail -10
+ journalctl | grep -i sshd | grep -i "accepted" | tail -10
 
 echo ""
 echo "Неуспешные входы:"
-journalctl | grep -i sshd | grep -i "failed password" | tail -10
+ journalctl | grep -i sshd | grep -i "failed password" | tail -10
 
 echo ""
 echo "Открытые порты:"
@@ -21,8 +21,8 @@ fail2ban-client status sshd | tail -1
 
 echo""
 echo "Список пользователей:"
-getent passwd | awk -F: '{print $1}'
-
+# getent passwd | awk -F: '{print $1}' | tr '\n' ' ' | fold -w 80
+getent passwd | awk -F: '{print $1}' | sort | awk '{l=substr($0,1,1); if(l!=prev){if(prev)print ""; prev=l; sep=""} else sep=", "; printf "%s%s", sep, $0} END{print ""}'
 echo ""
 echo "Список пользователей в группе sudo:"
 getent group sudo
