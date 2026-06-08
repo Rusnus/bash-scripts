@@ -26,3 +26,11 @@ getent passwd | awk -F: '{print $1}'
 echo ""
 echo "Список пользователей в группе sudo:"
 getent group sudo
+
+echo ""
+echo "Активные ссесии по SSH"
+who
+
+echo ""
+echo "Попытки входа:"
+journalctl --since today | grep -i sshd | wc -l
