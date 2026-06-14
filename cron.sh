@@ -12,14 +12,14 @@ clear
 echo "CRON"
 
 echo ""
-echo"Текущие задачи"
-crontab -l 2>/dev/null || echo "Нет задач"
+echo "Текущие задачи"
+crontab -l 2>/dev/null || echo "(Нет задач)"
 
 echo ""
 echo "Добавить новую задачу? (y/n):"
 read ADD_JOB
 
-if ["ADD_JOB" != "y"]; then
+if [ "$ADD_JOB" != "y" ]; then
 	exit 0
 fi
 
