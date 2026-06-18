@@ -21,15 +21,29 @@ fi
 
 #Добавление задачи
 echo ""
-read -p "Добавить новую задачу? (y/n): " ADD_JOB
-if [ "$ADD_JOB" != "y" ] && [ "$ADD_JOB" != "Y" ]; then
-        exit 0
-fi
+while true; do
+	read -r -p "Добавить новую задачу? (y/n): " ADD_JOB
+
+	if [ -z "$ADD_JOB" ]; then
+        	echo "Ввод не может быть пустым."
+		echo ""
+		continue
+	fi
+
+	if [ "$ADD_JOB" = "y" ] || [ "$ADD_JOB" = "Y" ]; then
+		break
+	elif [ "$ADD_JOB" = "n" ] || [ "$ADD_JOB" = "N" ]; then
+		exit 0
+	else
+		echo "Неверный ввод."
+		echo ""
+	fi
+done
 
 #Путь к скрипту
 echo ""
 while true; do
-	read -e -r -p "Введите полный путь к скрипту:" SCRIPT_PATH
+	read -e -r -p "Введите полный путь к скрипту: " SCRIPT_PATH
 
 	if [ -f "$SCRIPT_PATH" ]; then
 		break
@@ -42,7 +56,7 @@ done
 #Расписание задачи
 echo ""
 while true; do
-	read -r -p "Введите рассписание (пример: 0 9 * * *):" CRON_TIME
+	read -r -p "Введите расписание (пример: 0 9 * * *): " CRON_TIME
 	FIELDS_COUNT=$(echo "$CRON_TIME" | awk '{print NF}')
 
 	if [ "$FIELDS_COUNT" -ne 5 ]; then
@@ -54,4 +68,36 @@ while true; do
 	else
 		break
 	fi
+done
+
+#Логирование
+echo ""
+while true; do
+	read -r -p  "Включить логирование: (y/n): " ENABLE_LOG
+	if [ -z "$ENABLE_LOG" ]; then
+		echo "Ввод не может быть пустым."
+		echo ""
+		continue
+	fi
+
+	if [ "$ENABLE_LOG" = "y" ] || [ "$ENABLE_LOG" = "Y" ]; then
+                SCRIPT_NAME=$(basename "$SCRIPT_PATH")
+                SCRIPT_NAME="${SCRIPT_NAME%.sh}"
+                LOG_DIR="/var/log/cron_jobs/$SCRIPT_NAME"
+
+                mkdir -p "$LOG_DIR"
+                chmod 755 "$LOG_DIR"
+
+                LOG_FILE="$LOG_DIR/$SCRIPT_NAME.log"
+                CRON_COMMAND="$SCRIPT_PATH >> $LOG_FILE 2>&1"
+
+                echo -e "\nЛоги будут сохраняться в: $LOG_FILE"
+                break
+        elif [ "$ENABLE_LOG" = "n" ] || [ "$ENABLE_LOG" = "N" ]; then
+                CRON_COMMAND="$SCRIPT_PATH"
+                break
+        else
+                echo "Неверный ввод."
+                echo ""
+        fi
 done
