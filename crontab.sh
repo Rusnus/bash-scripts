@@ -73,7 +73,7 @@ done
 #Логирование
 echo ""
 while true; do
-	read -r -p  "Включить логирование: (y/n): " ENABLE_LOG
+	read -r -p  "Включить логирование? (y/n): " ENABLE_LOG
 	if [ -z "$ENABLE_LOG" ]; then
 		echo "Ввод не может быть пустым."
 		echo ""
@@ -101,3 +101,20 @@ while true; do
                 echo ""
         fi
 done
+
+echo -e "\nДобавление задачи..."
+
+#Безопасное добавление
+TMP_CRON=$(mktemp)
+if [ -n "$CURRENT_CRON" ]; then
+	echo "$CURRENT_CRON" >> "$TMP_CRON"
+fi
+echo "$CRON_TIME $CRON_COMMAND" >> "$TMP_CRON"
+
+#Отправка
+crontab "$TMP_CRON"
+rm -f "$TMP_CRON"
+
+echo "Задача успешно добавлена."
+echo -e "\nОбновлённый список задач:"
+crontab -l
