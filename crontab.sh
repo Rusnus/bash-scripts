@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [ "$EUID" -eq 0 ]; then
-        :
-else
+if [ "$EUID" -ne 0 ]; then
         echo "Необходимы права администратора."
         exit 1
 fi
@@ -40,18 +38,27 @@ while true; do
 	fi
 done
 
-#Путь к скрипту
+#Путь к скрипту и проверка на исполняемость
 echo ""
 while true; do
 	read -e -r -p "Введите полный путь к скрипту: " SCRIPT_PATH
 
 	if [ -f "$SCRIPT_PATH" ]; then
+		if [ ! -x "$SCRIPT_PATH" ]; then
+			read -r -p "Файл не исполняемый. Выдать права? (y/n): " FIX_EXECUT
+				if [ "$FIX_EXECUT" = "y" ]; then
+					chmod +x "$SCRIPT_PATH"
+				else 
+					echo "Внимание! Скрипт может не запуститься без прав на выполнение."
+				fi
+		fi
 		break
-	else 
+	else
 		echo "Файл не найден."
 		echo ""
 	fi
 done
+
 
 #Расписание задачи
 echo ""
@@ -89,7 +96,7 @@ while true; do
                 chmod 755 "$LOG_DIR"
 
                 LOG_FILE="$LOG_DIR/$SCRIPT_NAME.log"
-                CRON_COMMAND="$SCRIPT_PATH >> $LOG_FILE 2>&1"
+                CRON_COMMAND="\"$SCRIPT_PATH\" >> \"$LOG_FILE\" 2>&1"
 
                 echo -e "\nЛоги будут сохраняться в: $LOG_FILE"
                 break
@@ -106,15 +113,18 @@ echo -e "\nДобавление задачи..."
 
 #Безопасное добавление
 TMP_CRON=$(mktemp)
+trap "rm -f '$TMP_CRON'" EXIT
 if [ -n "$CURRENT_CRON" ]; then
 	echo "$CURRENT_CRON" >> "$TMP_CRON"
 fi
 echo "$CRON_TIME $CRON_COMMAND" >> "$TMP_CRON"
 
 #Отправка
-crontab "$TMP_CRON"
-rm -f "$TMP_CRON"
+if crontab "$TMP_CRON"; then
+	echo "Задача успешно добавлена."
+else
+	echo "Ошибка при добавлении задачи."
+fi
 
-echo "Задача успешно добавлена."
 echo -e "\nОбновлённый список задач:"
 crontab -l
