@@ -69,12 +69,43 @@ while true; do
 	if [ "$FIELDS_COUNT" -ne 5 ]; then
 		echo "Ошибка: расписание должно состоять из 5-ти элементов(минута час день месяц день_недели)"
 		echo ""
-	elif [[ "$CRON_TIME" =~ [^0-9\ \*\,/\-] ]]; then
+		continue
+	fi
+
+	if [[ "$CRON_TIME" =~ [^0-9\ \*\,/\-] ]]; then
 		echo "Ошибка: расписание не должно содержать буквы и не допустимые знаки."
 		echo ""
-	else
-		break
+		continue
 	fi
+
+	MIN=$(echo "$CRON_TIME" | awk '{print $1}')
+   	HRS=$(echo "$CRON_TIME" | awk '{print $2}')
+    	DAY=$(echo "$CRON_TIME" | awk '{print $3}')
+	MON=$(echo "$CRON_TIME" | awk '{print $4}')
+    	DOW=$(echo "$CRON_TIME" | awk '{print $5}')
+
+    	VALID=true
+
+	check_range() {
+		local val=$1 min=$2 max=$3 name=$4
+        	if [[ "$val" != "*" ]] && [[ "$val" =~ ^[0-9]+$ ]]; then
+            		if [ "$val" -lt "$min" ] || [ "$val" -gt "$max" ]; then
+                		echo "Ошибка: $name от $min до $max."
+                		echo ""
+                		VALID=false
+            		fi
+        	fi
+    	}
+
+	check_range "$MIN" 0 59 "минута"
+    	check_range "$HRS" 0 23 "час"
+    	check_range "$DAY" 1 31 "день"
+    	check_range "$MON" 1 12 "месяц"
+    	check_range "$DOW" 0 7  "день недели"
+
+    	if [ "$VALID" = true ]; then
+        	break
+    	fi
 done
 
 #Логирование
