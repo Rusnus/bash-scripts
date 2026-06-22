@@ -62,6 +62,18 @@ done
 
 #Расписание задачи
 echo ""
+
+check_range() {
+	local val=$1 min=$2 max=$3 name=$4
+        if [[ "$val" != "*" ]] && [[ "$val" =~ ^[0-9]+$ ]]; then
+            	if [ "$val" -lt "$min" ] || [ "$val" -gt "$max" ]; then
+                	echo "Ошибка: $name от $min до $max."
+                	echo ""
+                	VALID=false
+            	fi
+        fi
+}
+
 while true; do
 	read -r -p "Введите расписание (пример: 0 9 * * *): " CRON_TIME
 	FIELDS_COUNT=$(echo "$CRON_TIME" | awk '{print NF}')
@@ -78,24 +90,9 @@ while true; do
 		continue
 	fi
 
-	MIN=$(echo "$CRON_TIME" | awk '{print $1}')
-   	HRS=$(echo "$CRON_TIME" | awk '{print $2}')
-    	DAY=$(echo "$CRON_TIME" | awk '{print $3}')
-	MON=$(echo "$CRON_TIME" | awk '{print $4}')
-    	DOW=$(echo "$CRON_TIME" | awk '{print $5}')
+	read MIN HRS DAY MON DOW <<< "$CRON_TIME"
 
     	VALID=true
-
-	check_range() {
-		local val=$1 min=$2 max=$3 name=$4
-        	if [[ "$val" != "*" ]] && [[ "$val" =~ ^[0-9]+$ ]]; then
-            		if [ "$val" -lt "$min" ] || [ "$val" -gt "$max" ]; then
-                		echo "Ошибка: $name от $min до $max."
-                		echo ""
-                		VALID=false
-            		fi
-        	fi
-    	}
 
 	check_range "$MIN" 0 59 "минута"
     	check_range "$HRS" 0 23 "час"
