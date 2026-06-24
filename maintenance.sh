@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # Цвета
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -7,11 +9,12 @@ RESET='\033[0m'
 
 # Проверка root
 if [ "$EUID" -ne 0 ]; then
-  echo -e "${RED}❌ Запусти от root: sudo bash maintenance.sh${RESET}"
-  exit 1
+	echo -e "${RED} Требуются права администратора.${RESET}"
+	exit 1
 fi
 
-clear
+#Подавление интерактивных окон для APT
+export DEBIAN_FRONTEND=noninteractive
 
 echo -e "Дата: $(date '+%d.%m.%Y %H:%M:%S')"
 echo -e "Хост: $(hostname)"
@@ -19,7 +22,7 @@ echo ""
 
 # Место до очистки
 BEFORE=$(df -k / | awk 'NR==2 {print $4}')
-echo -e "Свободно места до очистки: ${BEFORE}${RESET}"
+echo -e "Свободно места до очистки: ${BEFORE} KB${RESET}"
 echo ""
 
 printf '%0.s─' {1..30}
@@ -55,11 +58,13 @@ echo ""
 AFTER=$(df -k / | awk 'NR==2 {print $4}')
 DIFF=$(( AFTER - BEFORE ))
 
-if [ "$DIFF" -ge 1024 ]; then
-    DIFF_MB=$(( DIFF / 1024 ))
-    echo "Освобождено: ${DIFF} KB / ${DIFF_MB} MB"
+if [ "$DIFF" -le 0 ]; then
+	echo " Освобождено: 0 КВ"
+elif [ "$DIFF" -ge 1024 ]; then
+	DIFF_MB=$(( DIFF / 1024 ))
+	echo "Освобождено: ${DIFF} KB / ${DIFF_MB} MB"
 else
-    echo " Освобождено: ${DIFF} KB"
+	echo " Освобождено: ${DIFF} KB"
 fi
 
 echo ""
