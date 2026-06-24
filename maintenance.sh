@@ -14,15 +14,15 @@ fi
 clear
 
 echo -e "Дата: $(date '+%d.%m.%Y %H:%M:%S')"
-echo -e "Хост:$(hostname)"
+echo -e "Хост: $(hostname)"
 echo ""
 
 # Место до очистки
-BEFORE=$(df -h / | awk 'NR==2 {print $4}')
+BEFORE=$(df -k / | awk 'NR==2 {print $4}')
 echo -e "Свободно места до очистки: ${BEFORE}${RESET}"
 echo ""
 
-echo -e "______________________________"
+printf '%0.s─' {1..30}
 
 # 1. Очистка старых логов
 echo -e "\n Очистка логов старше 7 дней..."
@@ -49,11 +49,20 @@ journalctl --vacuum-time=7d 2>/dev/null
 echo -e "${GREEN} Готово${RESET}"
 
 # Место после очистки
+
+printf '%0.s─' {1..30}
 echo ""
-echo -e "______________________________"
-AFTER=$(df -h / | awk 'NR==2 {print $4}')
-echo -e " Свободно места после очистки: ${AFTER}"
+AFTER=$(df -k / | awk 'NR==2 {print $4}')
+DIFF=$(( AFTER - BEFORE ))
+
+if [ "$DIFF" -ge 1024 ]; then
+    DIFF_MB=$(( DIFF / 1024 ))
+    echo "Освобождено: ${DIFF} KB / ${DIFF_MB} MB"
+else
+    echo " Освобождено: ${DIFF} KB"
+fi
+
 echo ""
 echo -e "${GREEN} Обслуживание завершено!${RESET}"
-echo -e "______________________________"
+printf '%0.s─' {1..30}
 echo ""
