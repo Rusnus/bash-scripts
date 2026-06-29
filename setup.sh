@@ -15,3 +15,13 @@ log()
 ok()
 warn()
 die()
+
+check_root() {
+	[[ "$EUID" -eq 0 ]] || die "Запустите от имени root: sudo bash setup.sh"
+}
+
+check_ubuntu() {
+	grep -qi ubuntu /etc/os-release || warn "Внимание! ОС не Ubuntu - некоторые шаги могут не сработать!"
+	log "OS: "$(grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '\")"
+}
+
