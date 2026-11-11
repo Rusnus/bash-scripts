@@ -15,7 +15,18 @@ SERVICES=("ssh" "ufw" "fail2ban" "cron")
 
 #func
 
-check_disk() { :; }
+check_disk() {
+	local USAGE=$(df / --output=pcent | tail -n1 | tr -cd '0-9')
+	if ! [[ "$USAGE" =~ ^[0-9]+$ ]]; then
+		echo "Не является числом"
+		return 2
+	fi
+	if [ "$USAGE" -ge "$THRESHOLD_DISK" ]; then
+		echo "Диск заполнен на $USAGE%!"
+		return 1
+	fi
+	return 0
+ }
 
 check_mem() { :; }
 
