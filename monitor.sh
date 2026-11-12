@@ -35,10 +35,14 @@ check_load() { :; }
 check_service() { :; }
 
 main() {
-	check_disk
-	check_mem
-	check_load
-	check_service
+	local status=0
+
+	check_disk || status=1
+	check_mem || status=1
+	check_load || status=1
+	check_service || status=1
+
+	return "$status"
 }
 
 main
