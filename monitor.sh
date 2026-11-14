@@ -22,13 +22,24 @@ check_disk() {
 		return 2
 	fi
 	if [ "$USAGE" -ge "$THRESHOLD_DISK" ]; then
-		echo "Диск заполнен на $USAGE%!"
+		echo "Диск заполнен на ${USAGE}%"
 		return 1
 	fi
 	return 0
  }
 
-check_mem() { :; }
+check_mem() {
+	local AVAIL=$(free -m | awk 'NR==2 {print $7}')
+	if ! [[ "$AVAIL" =~ ^[0-9]+$ ]]; then
+		echo "Не является числом $AVAIL"
+		return 2
+	fi
+	if [ "$AVAIL" -lt "$THRESHOLD_MEM" ]; then
+		echo "Заканчивается память, осталось - ${AVAIL} MB"
+		return 1
+	fi
+	return 0
+}
 
 check_load() { :; }
 
