@@ -10,7 +10,7 @@ LOG_FILE=/var/log/monitor.log
 
 THRESHOLD_DISK=80
 THRESHOLD_MEM=15
-THRESHOLD_LOAD=5
+THRESHOLD_LOAD=100
 SERVICES=("ssh" "ufw" "fail2ban" "cron")
 
 #func
@@ -41,7 +41,15 @@ check_mem() {
 	return 0
 }
 
-check_load() { :; }
+check_load() {
+	local CORES=$(nproc)
+	local LOAD5=$(awk '{print $2}' /proc/loadavg)
+	if ! [[ "$LOAD5" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+		echo "Не является числом $LOAD5"
+		return 2
+	fi
+	local LIMIT=$(( CORES * THRESHOLD_LOAD ))
+ }
 
 check_service() { :; }
 
