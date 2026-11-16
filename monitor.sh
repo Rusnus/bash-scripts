@@ -10,7 +10,7 @@ LOG_FILE=/var/log/monitor.log
 
 THRESHOLD_DISK=80
 THRESHOLD_MEM=15
-THRESHOLD_LOAD=100
+THRESHOLD_LOAD=1.0
 SERVICES=("ssh" "ufw" "fail2ban" "cron")
 
 #func
@@ -48,7 +48,12 @@ check_load() {
 		echo "Не является числом $LOAD5"
 		return 2
 	fi
-	local LIMIT=$(( CORES * THRESHOLD_LOAD ))
+	local OVER=$( echo "$LOAD5 > $CORES * $THRESHOLD_LOAD" | bc )
+	if [ "$OVER" -eq 1 ]; then
+		echo "Высокая нагрузка на процессор за 5 мин: $LOAD5"
+		return 1
+	fi
+	return 0
  }
 
 check_service() { :; }
