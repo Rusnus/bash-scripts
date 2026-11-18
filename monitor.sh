@@ -56,7 +56,16 @@ check_load() {
 	return 0
  }
 
-check_service() { :; }
+check_service() {
+	local FAILED=0
+	for SERVICE in "${SERVICES[@]}"; do
+		if ! systemctl is-active --quiet "$SERVICE"; then
+			echo "ВНИМАНИЕ: сервис ${SERVICE} не активен"
+			FAILED=1
+		fi
+	done
+	return "$FAILED"
+ }
 
 main() {
 	local status=0
