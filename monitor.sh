@@ -14,6 +14,13 @@ SERVICES=("ssh" "ufw" "fail2ban" "cron")
 
 #func
 
+check_root() {
+	if [[ "$EUID" -ne 0 ]]; then
+		echo "Отказано в доступе: запустите через sudo" >&2
+		exit 1
+	fi
+}
+
 check_disk() {
 	local USAGE=$(df / --output=pcent | tail -n1 | tr -cd '0-9')
 	if ! [[ "$USAGE" =~ ^[0-9]+$ ]]; then
@@ -67,6 +74,7 @@ check_service() {
  }
 
 main() {
+	check_root
 	local status=0
 
 	check_disk || status=1
